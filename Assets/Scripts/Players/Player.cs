@@ -17,7 +17,6 @@ public class Player : MonoBehaviour
     public JumpPointParam JumpPointParam { get; set; }
     public List<Vector3> PathVector { get; set; } = new List<Vector3>();
     public Transform Transform { get; set; }
-    public float Magnitude { get; set; }
     public float MoveSpeed { get; set; }
     public float Health { get; set; }
     public float Damage { get; set; }

@@ -28,14 +28,6 @@ public class GameLogic : MonoBehaviour
         var min = 0;
         var max = 10;
         StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
-        StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
-
-        //_players.Add(_zombiFactory.Get(SpecializationType.archer));
-        //_players.Add(_zombiFactory.Get(SpecializationType.swordsman));
-
-        //_players.Add(_peopleFactory.Get(SpecializationType.archer));
-        //_players.Add(_peopleFactory.Get(SpecializationType.swordsman));
-
     }
 
     private void Update()

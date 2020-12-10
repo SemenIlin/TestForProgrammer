@@ -26,8 +26,6 @@ public abstract class GameObjectFactory : ScriptableObject
         T instance = Instantiate(prefab);
 
         instance.Transform = instance.GetComponent<Transform>();
-        var _vector2 = new Vector2(instance.Transform.position.x, instance.Transform.position.z);
-        instance.Magnitude = (_vector2 - Vector2.zero).magnitude;
 
         SceneManager.MoveGameObjectToScene(instance.gameObject, _scene);
         return instance;
