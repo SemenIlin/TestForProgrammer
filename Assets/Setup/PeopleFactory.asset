@@ -15,8 +15,8 @@ MonoBehaviour:
   _swoardMan:
     Prefab: {fileID: 3362941753065641876, guid: 8d3519d2181c3634ebe71bde7d4ad7db, type: 3}
     Damage: 10
-    MoveSpeed: 1
-    Distance: 1.6
+    MoveSpeed: 3
+    Distance: 1
     Health: 100
     AttackSpeed: 3
   _archer:
@@ -24,5 +24,5 @@ MonoBehaviour:
     Damage: 10
     MoveSpeed: 3
     Distance: 6
-    Health: 50
+    Health: 100
     AttackSpeed: 3

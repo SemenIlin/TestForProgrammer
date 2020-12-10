@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EpPathFinding.cs;
+using System.Collections.Generic;
 using UnityEngine;
 public class Player : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class Player : MonoBehaviour
     /// It is position in List people.
     /// </summary>
     public int? IndexMoveToEnemy { get; set; }
+
+    public JumpPointParam JumpPointParam { get; set; }
     public List<Vector3> PathVector { get; set; } = new List<Vector3>();
     public Transform Transform { get; set; }
     public float Magnitude { get; set; }

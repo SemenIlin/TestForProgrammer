@@ -25,10 +25,17 @@ public class GameLogic : MonoBehaviour
 
         _players = new List<Player>();
 
-        var min = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.x : _gameField.SizeBoard.y;
-        var max = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.y : _gameField.SizeBoard.x;
+        var min = 0;
+        var max = 10;
         StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
         StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
+
+        //_players.Add(_zombiFactory.Get(SpecializationType.archer));
+        //_players.Add(_zombiFactory.Get(SpecializationType.swordsman));
+
+        //_players.Add(_peopleFactory.Get(SpecializationType.archer));
+        //_players.Add(_peopleFactory.Get(SpecializationType.swordsman));
+
     }
 
     private void Update()
@@ -49,14 +56,13 @@ public class GameLogic : MonoBehaviour
                 continue;
             }
 
-            _players[i].Transform.position = Vector3.MoveTowards(_players[i].Transform.position,
-                                                                 _path[_players[i]].Current,
-                                                                 _players[i].MoveSpeed * Time.deltaTime);
-
             var distanceI = (_players[i].Transform.position - _path[_players[i]].Current).sqrMagnitude;
 
             if (!IsComeAcross(_players[i], _players[_players[i].IndexMoveToEnemy.Value]))
             {
+                _players[i].Transform.position = Vector3.MoveTowards(_players[i].Transform.position,
+                                                                     _path[_players[i]].Current,
+                                                                     _players[i].MoveSpeed * Time.deltaTime);
                 if (distanceI < MAX_DISTANCE)
                 {
                     _path[_players[i]].MoveNext();
@@ -73,11 +79,6 @@ public class GameLogic : MonoBehaviour
     public void MoveToGoal()
     {
         CreatePathes();
-        foreach (var player in _players)
-        {
-            _path[player].MoveNext();
-            _path[player].MoveNext();
-        }
     }
 
     public void CreatePathes()
@@ -97,15 +98,24 @@ public class GameLogic : MonoBehaviour
             var endPosition = new GridPos((int)Math.Round(_players[player.IndexMoveToEnemy.Value].Transform.position.x),
                                           (int)Math.Round(_players[player.IndexMoveToEnemy.Value].Transform.position.z));
 
-            var jpParam = new JumpPointParam(_gameField.BaseGrid, startPosition, endPosition);
-            var path = JumpPointFinder.FindPath(jpParam);
+            if (player.JumpPointParam == null)
+                player.JumpPointParam = new JumpPointParam(_gameField.BaseGrid, startPosition, endPosition);
+            else
+                player.JumpPointParam.Reset(startPosition, endPosition);
+
+            var path = JumpPointFinder.FindPath(player.JumpPointParam);
 
             SetOccupiedCells(path);
             ConvertToVector3Position(path, y);
 
+            player.PathVector.Clear();
             player.PathVector.Copy(pathVector3);
 
             _path.Add(player, GetNextPosition(player.PathVector));
+
+            _path[player].MoveNext();
+            _path[player].MoveNext();
+
             pathVector3.Clear();
         }
     } 
@@ -201,6 +211,7 @@ public class GameLogic : MonoBehaviour
             playerArcher.Transform.position = positionArcher;
             _players.Add(playerArcher);
 
+            MoveToGoal();
             yield return new WaitForSeconds(3f);
 
             var playerSwordman = factory.Get(SpecializationType.swordsman);
@@ -211,7 +222,6 @@ public class GameLogic : MonoBehaviour
             _players.Add(playerSwordman);
 
             yield return new WaitForSeconds(1f);
-            MoveToGoal();
         }
     }
 }
