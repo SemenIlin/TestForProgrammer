@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu]
-public class ZombiFactory : GameObjectFactory
+public class ZombiFactory : GameObjectFactory, IFactory<Player>
 {
     [Serializable]
     class ZombiConfig
@@ -20,6 +20,9 @@ public class ZombiFactory : GameObjectFactory
 
         [Range(10f, 1000f)]
         public float Health = 100f;
+
+        [Range(1, 20)]
+        public float AttackSpeed = 3f;
     }
 
     [SerializeField]
@@ -40,11 +43,6 @@ public class ZombiFactory : GameObjectFactory
                             config.Distance);
 
         return _player;
-    }
-
-    public void Reclame(Player player)
-    {
-        Destroy(player.gameObject);
     }
 
     private ZombiConfig GetConfig(SpecializationType specialization)

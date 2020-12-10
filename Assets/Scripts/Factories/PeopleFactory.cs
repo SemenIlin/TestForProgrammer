@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu]
-public class PeopleFactory : GameObjectFactory
+public class PeopleFactory : GameObjectFactory, IFactory<Player>
 {
     [Serializable]
     class PeopleConfig
@@ -20,6 +20,9 @@ public class PeopleFactory : GameObjectFactory
         
         [Range (10f, 1000f)]
         public float Health = 100f;
+
+        [Range(1, 20)]
+        public float AttackSpeed = 3f;
     }
 
     [SerializeField]
@@ -40,11 +43,6 @@ public class PeopleFactory : GameObjectFactory
                            config.Distance);
         
         return _player;
-    }
-
-    public void Reclame(Player player)
-    {
-        Destroy(player.gameObject);
     }
     
     private PeopleConfig GetConfig(SpecializationType specialization)

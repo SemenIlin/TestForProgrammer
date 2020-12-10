@@ -11,7 +11,7 @@ public class GameField : MonoBehaviour
     private GameObject[,] _elementOfBoards;
     
     public BaseGrid BaseGrid { get; set; }
-    public Vector2 SizeBoard => _sizeBoard;
+    public Vector2Int SizeBoard => _sizeBoard;
     private void Start()
     {
         _sizeElementOfBoard = _elementOfBoardPrefab.GetComponent<Transform>();

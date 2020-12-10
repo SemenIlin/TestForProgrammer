@@ -7,7 +7,6 @@ using EpPathFinding.cs;
 public class GameLogic : MonoBehaviour
 {
     private const float MAX_DISTANCE = 0.01f;
-    private const float MIN_DISTANCE_BETWEEN_PLAYERS = 1f;
 
     [SerializeField] PeopleFactory _peopleFactory;
     [SerializeField] ZombiFactory _zombiFactory;
@@ -26,11 +25,10 @@ public class GameLogic : MonoBehaviour
 
         _players = new List<Player>();
 
-        _players.Add(_zombiFactory.Get(SpecializationType.archer));
-        _players.Add(_zombiFactory.Get(SpecializationType.swordsman));
-
-        _players.Add(_peopleFactory.Get(SpecializationType.swordsman));
-        _players.Add(_peopleFactory.Get(SpecializationType.archer));
+        var min = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.x : _gameField.SizeBoard.y;
+        var max = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.y : _gameField.SizeBoard.x;
+        StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
+        StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
     }
 
     private void Update()
@@ -38,6 +36,8 @@ public class GameLogic : MonoBehaviour
 
         for (var i = 0; i < _players.Count; ++i)
         {
+            if (!_players[i].IndexMoveToEnemy.HasValue)
+                continue;
 
             if (_players[i].PathVector == null || _players[i].PathVector.Count == 0)
             {
@@ -55,14 +55,18 @@ public class GameLogic : MonoBehaviour
 
             var distanceI = (_players[i].Transform.position - _path[_players[i]].Current).sqrMagnitude;
 
-            if (!IsComeAcross(_players[i], _players[_players[i].IndexMoveToEnemy]))
+            if (!IsComeAcross(_players[i], _players[_players[i].IndexMoveToEnemy.Value]))
             {
                 if (distanceI < MAX_DISTANCE)
                 {
                     _path[_players[i]].MoveNext();
                     MoveToGoal();
                 }
-            } 
+            }
+            else
+            {
+                TakeDamage(_players[i], _players[_players[i].IndexMoveToEnemy.Value]);
+            }
         }
     }
 
@@ -83,13 +87,15 @@ public class GameLogic : MonoBehaviour
         
         foreach (var player in _players)
         {
+            if (!player.IndexMoveToEnemy.HasValue)
+                continue;
+
             var y = player.Transform.position.y;
 
             var startPosition = new GridPos((int)Math.Round(player.Transform.position.x),
                                             (int)Math.Round(player.Transform.position.z));
-
-            var endPosition = new GridPos((int)Math.Round(_players[player.IndexMoveToEnemy].Transform.position.x),
-                                          (int)Math.Round(_players[player.IndexMoveToEnemy].Transform.position.z));
+            var endPosition = new GridPos((int)Math.Round(_players[player.IndexMoveToEnemy.Value].Transform.position.x),
+                                          (int)Math.Round(_players[player.IndexMoveToEnemy.Value].Transform.position.z));
 
             var jpParam = new JumpPointParam(_gameField.BaseGrid, startPosition, endPosition);
             var path = JumpPointFinder.FindPath(jpParam);
@@ -110,6 +116,7 @@ public class GameLogic : MonoBehaviour
         float tempararyDistance;
         for (var i = 0; i < _players.Count; ++i)
         {
+            _players[i].IndexMoveToEnemy = null;
             distance = float.MaxValue;
             for (var j = 0; j < _players.Count; ++j)
             {
@@ -128,7 +135,23 @@ public class GameLogic : MonoBehaviour
             }
         }
     }
-    
+
+    private void TakeDamage(Player causeDamage, Player takesDamage)
+    {
+        takesDamage.Health -= causeDamage.Damage * Time.deltaTime;
+        if(takesDamage.Health <= 0)
+        {
+            Debug.Log("Death");
+            DestoyPlayer(takesDamage);
+        }
+    }
+
+    private void DestoyPlayer(Player player)
+    {
+        _players.Remove(player);
+        Destroy(player.gameObject);
+        CreatePathes();
+    }
     private void ConvertToVector3Position(List<GridPos> gridPos, float y)
     {
         for (var i = 0; i < gridPos.Count; ++i)
@@ -146,7 +169,7 @@ public class GameLogic : MonoBehaviour
 
     private bool IsComeAcross(Player a, Player b)
     {
-        return (a.Transform.position - b.Transform.position).magnitude < MIN_DISTANCE_BETWEEN_PLAYERS ? true : false;
+        return (a.Transform.position - b.Transform.position).magnitude < a.Distance ? true : false;
     }
 
     private IEnumerator<Vector3> GetNextPosition(List<Vector3> positions)
@@ -165,5 +188,30 @@ public class GameLogic : MonoBehaviour
                 movingTo += direction;
             }
         }       
+    }
+
+    private IEnumerator SpawnPlayers(int min, int max, IFactory<Player> factory)
+    {
+        while (true)
+        {
+            var playerArcher = factory.Get(SpecializationType.archer);
+            var positionArcher = new Vector3(UnityEngine.Random.Range(min / 2, max),
+                                       playerArcher.Transform.position.y,
+                                       UnityEngine.Random.Range(min / 2, max));
+            playerArcher.Transform.position = positionArcher;
+            _players.Add(playerArcher);
+
+            yield return new WaitForSeconds(3f);
+
+            var playerSwordman = factory.Get(SpecializationType.swordsman);
+            var position = new Vector3(UnityEngine.Random.Range(min / 2, max),
+                                       playerSwordman.Transform.position.y,
+                                       UnityEngine.Random.Range(min / 2, max));
+            playerSwordman.Transform.position = position;
+            _players.Add(playerSwordman);
+
+            yield return new WaitForSeconds(1f);
+            MoveToGoal();
+        }
     }
 }

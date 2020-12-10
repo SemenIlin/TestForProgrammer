@@ -16,11 +16,13 @@ MonoBehaviour:
     Prefab: {fileID: 3362941753065641876, guid: 9ab0c2d02fbf4224089453c129e77784, type: 3}
     Damage: 10
     MoveSpeed: 3
-    Distance: 1
+    Distance: 1.6
     Health: 100
+    AttackSpeed: 3
   _archer:
     Prefab: {fileID: 6370891078274493246, guid: 90b0aa78f18c3684faa5ca9c2c671f72, type: 3}
     Damage: 10
     MoveSpeed: 3
-    Distance: 1
+    Distance: 3
     Health: 100
+    AttackSpeed: 3
