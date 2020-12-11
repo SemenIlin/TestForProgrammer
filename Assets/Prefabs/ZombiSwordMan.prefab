@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7105284043489785295}
   - component: {fileID: 7105284043489785292}
   - component: {fileID: 3362941753065641876}
+  - component: {fileID: -7936818633494668270}
   m_Layer: 0
   m_Name: ZombiSwordMan
   m_TagString: Untagged
@@ -96,3 +97,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _specialization: 0
   _raceType: 1
+--- !u!114 &-7936818633494668270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105284043489785290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea3cd3f91d454294f945cbfabb4a415f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gameLogic: {fileID: 7153531095457806223, guid: 02d18326238350241bd230c3e7f14b06, type: 3}
