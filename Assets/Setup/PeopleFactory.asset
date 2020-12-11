@@ -17,12 +17,12 @@ MonoBehaviour:
     Damage: 10
     MoveSpeed: 3
     Distance: 1
-    Health: 100
+    Health: 200
     AttackSpeed: 6
   _archer:
     Prefab: {fileID: 6370891078274493246, guid: b97dae6b57ef6394aba9eaee686e2fe7, type: 3}
     Damage: 10
     MoveSpeed: 5
-    Distance: 5
-    Health: 50
+    Distance: 4
+    Health: 100
     AttackSpeed: 8

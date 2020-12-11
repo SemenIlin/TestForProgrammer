@@ -4,9 +4,9 @@ public class CameraController : MonoBehaviour
 {
     private const float ZOOM_COEFFICIENT = 0.01f;
 
-    [SerializeField] private readonly float speed;
-    [SerializeField] private readonly float minSize;
-    [SerializeField] private readonly float maxSize;
+    [SerializeField] private float speed;
+    [SerializeField] private float minSize;
+    [SerializeField] private float maxSize;
     [SerializeField] private Vector2 minCameraPosition;
     [SerializeField] private Vector2 maxCameraPosition;
 

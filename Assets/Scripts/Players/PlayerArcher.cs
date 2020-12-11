@@ -59,18 +59,24 @@ public class PlayerArcher : MonoBehaviour
     {
         var bullet = Instantiate(_bullet, _player.Transform, false);
         var bulletTransform = bullet.GetComponent<Transform>();
-        var startPosition = bulletTransform.position;
-        float t = 0;
+        bulletTransform.position = _player.Transform.position;
+        var playerTakeDamage = _gameLogic.Players[_player.IndexMoveToEnemy.Value];
 
+        float t = 0;
         while (t < 1)
         {
-            bulletTransform.position = Vector3.Lerp(startPosition, _gameLogic.Players[_player.IndexMoveToEnemy.Value].Transform.position, t);
+            if (playerTakeDamage.Health <= 0)
+                break;
+
+            bulletTransform.position = Vector3.Lerp(bulletTransform.position, playerTakeDamage.Transform.position, t);
             t += Time.deltaTime / (INTERVAL / _player.AttackSpeed);
             yield return null;
-
         }
 
-        _gameLogic.TakeDamage(_player, _gameLogic.Players[_player.IndexMoveToEnemy.Value]);
+        Destroy(bullet);
+        if (playerTakeDamage.Health > 0)
+            _gameLogic.TakeDamage(_player, playerTakeDamage);
+       
         yield return new WaitForSeconds(INTERVAL / _player.AttackSpeed);
         _isTakeDamage = false;
     }

@@ -21,8 +21,8 @@ MonoBehaviour:
     AttackSpeed: 3
   _archer:
     Prefab: {fileID: 6370891078274493246, guid: 90b0aa78f18c3684faa5ca9c2c671f72, type: 3}
-    Damage: 20
+    Damage: 10
     MoveSpeed: 1
-    Distance: 3
-    Health: 200
-    AttackSpeed: 1
+    Distance: 4
+    Health: 100
+    AttackSpeed: 6

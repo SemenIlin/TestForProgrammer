@@ -14,7 +14,7 @@ public class GameLogic : MonoBehaviour
 
     private List<Vector3> pathVector3;
     public List<Player> Players { get; private set; }
-    public Dictionary<Player, IEnumerator<Vector3>> Path { get; private set; }   
+    public Dictionary<Player, IEnumerator<Vector3>> Path { get; private set; }
 
     private void Start()
     {
