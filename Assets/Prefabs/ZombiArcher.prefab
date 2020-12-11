@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8509110927087737929}
   - component: {fileID: 7642759577041146711}
   - component: {fileID: 6370891078274493246}
-  - component: {fileID: 3336680361920177583}
+  - component: {fileID: 6064090305659917164}
   m_Layer: 0
   m_Name: ZombiArcher
   m_TagString: Untagged
@@ -97,7 +97,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _specialization: 1
   _raceType: 1
---- !u!114 &3336680361920177583
+--- !u!114 &6064090305659917164
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,6 +106,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6073842485021055918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea3cd3f91d454294f945cbfabb4a415f, type: 3}
+  m_Script: {fileID: 11500000, guid: bcd247badbbbdb845b2e5e90f4d20e83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bullet: {fileID: 7937555487931405472, guid: f8707ef39f977cd449b557ee20fb9187, type: 3}

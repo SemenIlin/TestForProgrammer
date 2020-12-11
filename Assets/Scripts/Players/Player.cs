@@ -17,16 +17,18 @@ public class Player : MonoBehaviour
     public JumpPointParam JumpPointParam { get; set; }
     public List<Vector3> PathVector { get; set; } = new List<Vector3>();
     public Transform Transform { get; set; }
+    public float AttackSpeed { get; set; }
     public float MoveSpeed { get; set; }
     public float Health { get; set; }
     public float Damage { get; set; }
     public float Distance { get; set; }
-    public void Initialize(float moveSpeed, float health, float damage, float distance)
+    public void Initialize(float moveSpeed, float health, float damage, float distance, float attackSpeed)
     {
         MoveSpeed = moveSpeed;
         Health = health;
         Damage = damage;
         Distance = distance;
+        AttackSpeed = attackSpeed;
     }
 }
 

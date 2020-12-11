@@ -40,7 +40,8 @@ public class PeopleFactory : GameObjectFactory, IFactory<Player>
         _player.Initialize(config.MoveSpeed,
                            config.Health,
                            config.Damage,
-                           config.Distance);
+                           config.Distance,
+                           config.AttackSpeed);
         
         return _player;
     }

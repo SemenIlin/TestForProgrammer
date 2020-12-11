@@ -23,8 +23,8 @@ public class GameLogic : MonoBehaviour
 
         Players = new List<Player>();
 
-        var min = 0;
-        var max = 10;
+        var min = 20;
+        var max = 30;
 
         StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
         StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
@@ -107,7 +107,7 @@ public class GameLogic : MonoBehaviour
 
     public void TakeDamage(Player causeDamage, Player takesDamage)
     {
-        takesDamage.Health -= causeDamage.Damage * Time.deltaTime;
+        takesDamage.Health -= causeDamage.Damage;
         if (takesDamage.Health <= 0)
         {
             Debug.Log("Death");
