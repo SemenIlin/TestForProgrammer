@@ -1,4 +1,4 @@
-﻿public interface IFactory<T> where T : class 
+﻿public interface IFactory<T> where T : Player
 {
     T Get(SpecializationType specialization);
 }

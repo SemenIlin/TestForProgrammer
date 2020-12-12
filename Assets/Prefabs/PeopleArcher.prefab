@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8509110927087737929}
   - component: {fileID: 7642759577041146711}
   - component: {fileID: 6370891078274493246}
-  - component: {fileID: 1864640773354281814}
+  - component: {fileID: 3054749595497742660}
   m_Layer: 0
   m_Name: PeopleArcher
   m_TagString: Untagged
@@ -92,12 +92,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 6073842485021055918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7568a65268202ae4781b7e952668e897, type: 3}
+  m_Script: {fileID: 11500000, guid: 0136ce936bccb3d4b895f8bb36e08d04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _specialization: 1
   _raceType: 0
---- !u!114 &1864640773354281814
+--- !u!114 &3054749595497742660
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,7 +106,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6073842485021055918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcd247badbbbdb845b2e5e90f4d20e83, type: 3}
+  m_Script: {fileID: 11500000, guid: c45f92a5dbb4b9749a36dd0e22ad9421, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _bullet: {fileID: 7937555487931405472, guid: 2d46e376781c19b49b09a0cb26135388, type: 3}

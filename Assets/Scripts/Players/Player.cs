@@ -5,7 +5,6 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private SpecializationType _specialization;
     [SerializeField] private RaceType _raceType;
-
     public SpecializationType SpecializationType => _specialization;
     public RaceType RaceType => _raceType;
 
@@ -13,7 +12,6 @@ public class Player : MonoBehaviour
     /// It is position in List people.
     /// </summary>
     public int? IndexMoveToEnemy { get; set; }
-
     public JumpPointParam JumpPointParam { get; set; }
     public List<Vector3> PathVector { get; set; } = new List<Vector3>();
     public Transform Transform { get; set; }
@@ -22,6 +20,9 @@ public class Player : MonoBehaviour
     public float Health { get; set; }
     public float Damage { get; set; }
     public float Distance { get; set; }
+    public bool IsTakeDamage { get; set; }
+    public ITakeDamage TakeDamage { get; set; }
+
     public void Initialize(float moveSpeed, float health, float damage, float distance, float attackSpeed)
     {
         MoveSpeed = moveSpeed;
@@ -29,6 +30,7 @@ public class Player : MonoBehaviour
         Damage = damage;
         Distance = distance;
         AttackSpeed = attackSpeed;
+        IsTakeDamage = false;
     }
 }
 

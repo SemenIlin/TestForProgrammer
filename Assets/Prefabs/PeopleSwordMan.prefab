@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7105284043489785295}
   - component: {fileID: 7105284043489785292}
   - component: {fileID: 3362941753065641876}
-  - component: {fileID: 2972202682421405384}
+  - component: {fileID: 7645916128736879309}
   m_Layer: 0
   m_Name: PeopleSwordMan
   m_TagString: Untagged
@@ -92,12 +92,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7105284043489785290}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7568a65268202ae4781b7e952668e897, type: 3}
+  m_Script: {fileID: 11500000, guid: 0136ce936bccb3d4b895f8bb36e08d04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _specialization: 0
   _raceType: 0
---- !u!114 &2972202682421405384
+--- !u!114 &7645916128736879309
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,6 +106,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 7105284043489785290}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea3cd3f91d454294f945cbfabb4a415f, type: 3}
+  m_Script: {fileID: 11500000, guid: 174c4a5dd2e8b5b419dad5bb842bbffe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

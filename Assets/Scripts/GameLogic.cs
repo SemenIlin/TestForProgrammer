@@ -3,18 +3,33 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using EpPathFinding.cs;
-using UnityEngine.UI;
 
 public class GameLogic : MonoBehaviour
 {
+    public const float INTERVAL = 5f;
+    private const float MAX_DISTANCE = 0.01f;
+
     [SerializeField] PeopleFactory _peopleFactory;
     [SerializeField] ZombiFactory _zombiFactory;
     [SerializeField] GameField _gameField;
-    [SerializeField] Text _count;
 
     private List<Vector3> pathVector3;
     public List<Player> Players { get; private set; }
     public Dictionary<Player, IEnumerator<Vector3>> Path { get; private set; }
+
+    public static GameLogic Instance;
+    public static event Action<int> UpdateQuantityPlayers;
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            return;
+        }
+    }
 
     private void Start()
     {
@@ -29,6 +44,50 @@ public class GameLogic : MonoBehaviour
         StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
         StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
     }
+
+    private void Update()
+    {
+        var deltaTime = Time.deltaTime;
+        for (var i = 0; i < Players.Count; ++i)
+        {
+            if (!Players[i].IsTakeDamage)
+            {
+                if (!Players[i].IndexMoveToEnemy.HasValue)
+                {
+                    SearchPathForNearbyEnemy(Players[i]);
+                    continue;
+                }
+                if (Players[i].PathVector.Count == 0)
+                {
+                    CreatePathForNearbyEnemy(Players[i]);
+                    continue;
+                }
+                if (Path[Players[i]] == null)
+                {
+                    continue;
+                }
+
+                var distance = (Players[i].Transform.position - Path[Players[i]].Current).sqrMagnitude;
+
+                if (!IsComeAcross(Players[i], Players[Players[i].IndexMoveToEnemy.Value]))
+                {
+                    Players[i].Transform.position = Vector3.MoveTowards(Players[i].Transform.position,
+                                                                    Path[Players[i]].Current,
+                                                                    Players[i].MoveSpeed * deltaTime);
+                    if (distance < MAX_DISTANCE)
+                    {
+                        CreatePathForNearbyEnemy(Players[i]);
+                        Path[Players[i]].MoveNext();
+                    }
+                }
+                else
+                {
+                    Players[i].IsTakeDamage = true;
+                    StartCoroutine(Players[i].TakeDamage.Damage());
+                }
+            }
+        }
+    } 
 
     /// <summary>
     /// Create path for concrete player. Use after Change position.
@@ -45,10 +104,10 @@ public class GameLogic : MonoBehaviour
     }
 
     /// <summary>
-    /// Create pathes for all player of concrete race. Use after Death and Spawn player.
+    /// Create pathes for all player. Use after Death and Spawn player.
     /// </summary>
     /// <param name="player"></param>
-    public void CreatePathesForNearbyEnemy(Player player)
+    public void CreatePathesForNearbyEnemy()
     {
         float distance;
         float tempararyDistance;
@@ -57,9 +116,6 @@ public class GameLogic : MonoBehaviour
         {
             Players[i].IndexMoveToEnemy = null;
             distance = float.MaxValue;
-
-            if (Players[i].RaceType != player.RaceType)
-                continue;
 
             for (var j = 0; j < Players.Count; ++j)
             {
@@ -111,14 +167,10 @@ public class GameLogic : MonoBehaviour
         if (takesDamage.Health <= 0)
         {
             Debug.Log("Death");
-            DestoyPlayer(takesDamage, causeDamage);
+            DestoyPlayer(takesDamage);
         }
     }
 
-    public void RemovePath(Player player)
-    {
-        Path.Remove(player);
-    }
     private void ChangePath(Player player)
     {
         AddPathVectorForPlayer(player);
@@ -172,14 +224,14 @@ public class GameLogic : MonoBehaviour
         return JumpPointFinder.FindPath(player.JumpPointParam);
     } 
 
-    private void DestoyPlayer(Player takesDamage, Player causeDamage)
+    private void DestoyPlayer(Player takesDamage)
     {
-        RemovePath(takesDamage);
+        Path.Remove(takesDamage);
         Players.Remove(takesDamage);
-        _count.text = Players.Count.ToString();
+        UpdateQuantityPlayers?.Invoke(Players.Count);
         Destroy(takesDamage.gameObject);
 
-        CreatePathesForNearbyEnemy(causeDamage);
+        CreatePathesForNearbyEnemy();
     }
     private void ConvertToVector3Position(List<GridPos> gridPos, float y)
     {
@@ -218,27 +270,27 @@ public class GameLogic : MonoBehaviour
             }
         }       
     }
+    
     private IEnumerator SpawnPlayers(int min, int max, IFactory<Player> factory)
     {
         while (true)
         {
             var playerArcher = factory.Get(SpecializationType.archer);
-            var positionArcher = new Vector3(UnityEngine.Random.Range(min / 2, max),
+            var positionArcher = new Vector3(UnityEngine.Random.Range(min, max),
                                        playerArcher.Transform.position.y,
-                                       UnityEngine.Random.Range(min / 2, max));
+                                       UnityEngine.Random.Range(min, max));
             playerArcher.Transform.position = positionArcher;
             Players.Add(playerArcher);
-            CreatePathForNearbyEnemy(playerArcher);
 
             var playerSwordman = factory.Get(SpecializationType.swordsman);
-            var position = new Vector3(UnityEngine.Random.Range(min / 2, max),
+            var position = new Vector3(UnityEngine.Random.Range(min, max),
                                        playerSwordman.Transform.position.y,
-                                       UnityEngine.Random.Range(min / 2, max));
+                                       UnityEngine.Random.Range(min, max));
             playerSwordman.Transform.position = position;
             Players.Add(playerSwordman);
-            _count.text = Players.Count.ToString();
-            CreatePathForNearbyEnemy(playerSwordman);
-            CreatePathesForNearbyEnemy(playerSwordman);
+            UpdateQuantityPlayers?.Invoke(Players.Count);
+
+            CreatePathesForNearbyEnemy();
 
             yield return new WaitForSeconds(3f);
         }
