@@ -3,18 +3,28 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using EpPathFinding.cs;
+using System.Linq;
 
 public class GameLogic : MonoBehaviour
 {
     public const float INTERVAL = 5f;
     private const float MAX_DISTANCE = 0.01f;
+    private const float PPERIOD_FOR_UPDATE = 0.8f;
+    private const int SIZE_OF_ARMY = 200;
+    
+    [SerializeField] private PeopleFactory _peopleFactory;
+    [SerializeField] private ZombiFactory _zombiFactory;
+    private GameField _gameField;
 
-    [SerializeField] PeopleFactory _peopleFactory;
-    [SerializeField] ZombiFactory _zombiFactory;
-    [SerializeField] GameField _gameField;
-
+    private int _index;
     private List<Vector3> pathVector3;
-    public List<Player> Players { get; private set; }
+
+    private List<Player> _peopleSwordmans;
+    private List<Player> _peopleArchers;
+
+    private List<Player> _zombieSwordmans;
+    private List<Player> _zombieArchers;
+    public Dictionary<int, Player> Players { get; private set; }
     public Dictionary<Player, IEnumerator<Vector3>> Path { get; private set; }
 
     public static GameLogic Instance;
@@ -33,57 +43,74 @@ public class GameLogic : MonoBehaviour
 
     private void Start()
     {
+        InitArmy();
+        CreatedArmy(_zombiFactory, SpecializationType.archer, _zombieArchers, SIZE_OF_ARMY);
+        CreatedArmy(_zombiFactory, SpecializationType.swordsman, _zombieSwordmans, SIZE_OF_ARMY);
+        CreatedArmy(_peopleFactory, SpecializationType.archer, _peopleArchers, SIZE_OF_ARMY);
+        CreatedArmy(_peopleFactory, SpecializationType.swordsman, _peopleSwordmans, SIZE_OF_ARMY);
+
+        _index = 0;
+        _gameField = GameField.Instance;
         pathVector3 = new List<Vector3>();
         Path = new Dictionary<Player, IEnumerator<Vector3>>();
 
-        Players = new List<Player>();
+        Players = new Dictionary<int, Player>();
 
-        var min = 20;
-        var max = 30;
+        var max = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.y :
+                                                                     _gameField.SizeBoard.x;
 
-        StartCoroutine(SpawnPlayers(min, max, _peopleFactory));
-        StartCoroutine(SpawnPlayers(min, max, _zombiFactory));
+        StartCoroutine(SpawnPlayers(0, max - 1, _peopleArchers, _peopleSwordmans));
+        StartCoroutine(SpawnPlayers(0, max - 1, _zombieArchers, _zombieSwordmans));
     }
 
     private void Update()
     {
         var deltaTime = Time.deltaTime;
-        for (var i = 0; i < Players.Count; ++i)
+        foreach (var player in Players.ToArray())
         {
-            if (!Players[i].IsTakeDamage)
+            if (!player.Value.IsTakeDamage)
             {
-                if (!Players[i].IndexMoveToEnemy.HasValue)
+                if (!player.Value.IndexMoveToEnemy.HasValue)
                 {
-                    SearchPathForNearbyEnemy(Players[i]);
+                    CreatePathForNearbyEnemy(player.Value);
                     continue;
                 }
-                if (Players[i].PathVector.Count == 0)
-                {
-                    CreatePathForNearbyEnemy(Players[i]);
-                    continue;
-                }
-                if (Path[Players[i]] == null)
-                {
-                    continue;
-                }
+                if (!Players.ContainsKey(player.Value.IndexMoveToEnemy.Value))
+                    continue;              
 
-                var distance = (Players[i].Transform.position - Path[Players[i]].Current).sqrMagnitude;
+                if (!Path.ContainsKey(player.Value) || 
+                    Path[player.Value] == null)
+                    continue;
 
-                if (!IsComeAcross(Players[i], Players[Players[i].IndexMoveToEnemy.Value]))
+                var distance = (player.Value.Transform.position - Path[player.Value].Current).sqrMagnitude;
+                
+                if (!IsComeAcross(player.Value, Players[player.Value.IndexMoveToEnemy.Value]))
                 {
-                    Players[i].Transform.position = Vector3.MoveTowards(Players[i].Transform.position,
-                                                                    Path[Players[i]].Current,
-                                                                    Players[i].MoveSpeed * deltaTime);
+                    player.Value.Transform.position = Vector3.MoveTowards(player.Value.Transform.position,
+                                                                    Path[player.Value].Current,
+                                                                    player.Value.MoveSpeed * deltaTime);
                     if (distance < MAX_DISTANCE)
                     {
-                        CreatePathForNearbyEnemy(Players[i]);
-                        Path[Players[i]].MoveNext();
+                        CreatePathForNearbyEnemy(player.Value);
+                        if (Path[player.Value] == null)
+                            continue;
+
+                        Path[player.Value].MoveNext();
+                    }
+                    else
+                    {
+                        player.Value.TimeUntilNextUpdate += deltaTime;
+                        if (player.Value.TimeUntilNextUpdate > PPERIOD_FOR_UPDATE)
+                        {
+                            player.Value.TimeUntilNextUpdate = 0;
+                            CreatePathForNearbyEnemy(player.Value);
+                        }
                     }
                 }
                 else
                 {
-                    Players[i].IsTakeDamage = true;
-                    StartCoroutine(Players[i].TakeDamage.Damage());
+                    player.Value.IsTakeDamage = true;
+                    StartCoroutine(player.Value.TakeDamage.Damage());
                 }
             }
         }
@@ -104,39 +131,36 @@ public class GameLogic : MonoBehaviour
     }
 
     /// <summary>
-    /// Create pathes for all player. Use after Death and Spawn player.
+    /// Create pathes for all player without target. Use after Death and Spawn player.
     /// </summary>
     /// <param name="player"></param>
-    public void CreatePathesForNearbyEnemy()
+    public void CreatePathesForNearbyEnemy(Dictionary<int, Player> players)
     {
         float distance;
         float tempararyDistance;
 
-        for (var i = 0; i < Players.Count; ++i)
+        foreach(var player in players)
         {
-            Players[i].IndexMoveToEnemy = null;
+            player.Value.IndexMoveToEnemy = null;
             distance = float.MaxValue;
 
-            for (var j = 0; j < Players.Count; ++j)
+            foreach (var playerJ in Players)
             {
-                if (i == j)
+                if (player.Value.RaceType == playerJ.Value.RaceType)
                     continue;
 
-                if (Players[i].RaceType == Players[j].RaceType)
-                    continue;
-
-                tempararyDistance = (Players[i].Transform.position - Players[j].Transform.position).magnitude;
+                tempararyDistance = (player.Value.Transform.position - playerJ.Value.Transform.position).magnitude;
                 if (distance > tempararyDistance)
                 {
                     distance = tempararyDistance;
-                    Players[i].IndexMoveToEnemy = j;
+                    player.Value.IndexMoveToEnemy = playerJ.Value.IndexInDictionary;
                 }
             }
 
-            if (Path.ContainsKey(Players[i]))
-                ChangePath(Players[i]); 
+            if (Path.ContainsKey(player.Value))
+                ChangePath(player.Value); 
             else
-                AddPath(Players[i]);
+                AddPath(player.Value);
         }
     }
     public void SearchPathForNearbyEnemy(Player player)
@@ -146,17 +170,17 @@ public class GameLogic : MonoBehaviour
 
         player.IndexMoveToEnemy = null;
         distance = float.MaxValue;
-        
-        for (var j = 0; j < Players.Count; ++j)
+
+        foreach (var item in Players)
         {
-            if (player.RaceType == Players[j].RaceType)
+            if (player.RaceType == item.Value.RaceType)
                 continue;
 
-            tempararyDistance = (player.Transform.position - Players[j].Transform.position).magnitude;
+            tempararyDistance = (player.Transform.position - item.Value.Transform.position).magnitude;
             if (distance > tempararyDistance)
             {
                 distance = tempararyDistance;
-                player.IndexMoveToEnemy = j;
+                player.IndexMoveToEnemy = item.Value.IndexInDictionary;
             }
         }
     }
@@ -166,14 +190,23 @@ public class GameLogic : MonoBehaviour
         takesDamage.Health -= causeDamage.Damage;
         if (takesDamage.Health <= 0)
         {
-            Debug.Log("Death");
             DestoyPlayer(takesDamage);
         }
     }
 
+    private Dictionary<int, Player> GetPlayrsWithoutTarget(Player takesDamage)
+    {
+        return Players.Where(player => player.Value.IndexMoveToEnemy == takesDamage.IndexInDictionary)
+                      .ToDictionary(k => k.Key, v => v.Value);
+    }
     private void ChangePath(Player player)
     {
         AddPathVectorForPlayer(player);
+        if (player.PathVector == null)
+        {
+            Path[player] = null;
+            return;
+        }
         Path[player] = GetNextPosition(player.PathVector);
 
         Path[player].MoveNext();
@@ -190,12 +223,15 @@ public class GameLogic : MonoBehaviour
         Path[player].MoveNext();
     }
 
-
     private void AddPathVectorForPlayer(Player player)
     {
         var path = CreatePath(player);
         if (path == null)
+        {
+            player.PathVector.Clear();
+            pathVector3.Clear();
             return;
+        }
 
         var y = player.Transform.position.y;
         SetOccupiedCells(path);
@@ -227,11 +263,12 @@ public class GameLogic : MonoBehaviour
     private void DestoyPlayer(Player takesDamage)
     {
         Path.Remove(takesDamage);
-        Players.Remove(takesDamage);
-        UpdateQuantityPlayers?.Invoke(Players.Count);
-        Destroy(takesDamage.gameObject);
+        var playersWitoutTarget = GetPlayrsWithoutTarget(takesDamage);
+        Players.Remove(takesDamage.IndexInDictionary);
+        DisatcivatePlayer(takesDamage);
+        CreatePathesForNearbyEnemy(playersWitoutTarget);
 
-        CreatePathesForNearbyEnemy();
+        UpdateQuantityPlayers?.Invoke(Players.Count);
     }
     private void ConvertToVector3Position(List<GridPos> gridPos, float y)
     {
@@ -246,6 +283,36 @@ public class GameLogic : MonoBehaviour
         {
             _gameField.BaseGrid.GetNodeAt(pos).Reset();
         }
+    }
+
+    private void DisatcivatePlayer(Player takesDamage)
+    {
+        Player disactivate = null;
+        switch (takesDamage.RaceType)
+        {
+            case RaceType.people:
+                if (takesDamage.SpecializationType == SpecializationType.swordsman)
+                {
+                    disactivate = _peopleSwordmans[takesDamage.IndexInList];
+                }
+                else if (takesDamage.SpecializationType == SpecializationType.archer)
+                {
+                    disactivate = _peopleArchers[takesDamage.IndexInList];
+                }
+                break;
+            case RaceType.zombi:
+                if (takesDamage.SpecializationType == SpecializationType.swordsman)
+                {
+                    disactivate = _zombieSwordmans[takesDamage.IndexInList];
+                }
+                else if (takesDamage.SpecializationType == SpecializationType.archer)
+                {
+                    disactivate = _zombieArchers[takesDamage.IndexInList];
+                }
+                break;
+        }
+        disactivate.Transform.position = new Vector3(-100, -100, -100);
+        disactivate.enabled = false;
     }
 
     public bool IsComeAcross(Player a, Player b)
@@ -270,29 +337,68 @@ public class GameLogic : MonoBehaviour
             }
         }       
     }
-    
-    private IEnumerator SpawnPlayers(int min, int max, IFactory<Player> factory)
+
+    private void AddPlayer(Player player, int indexOnMap, int indexInArmy)
     {
+        Players.Add(indexOnMap, player);
+        player.IndexInDictionary = indexOnMap;
+        player.IndexInList = indexInArmy;
+    }
+
+    private void SetPlayerPosition(Player player, int min, int max)
+    {
+        var position = new Vector3(UnityEngine.Random.Range(min, max),
+                                       player.Transform.position.y,
+                                       UnityEngine.Random.Range(min, max));
+
+        player.enabled = true;
+        player.Transform.position = position;
+    }
+    
+    private IEnumerator SpawnPlayers(int min, int max, List<Player> archers, List<Player> swordman)
+    {
+        var indexArcher = 0;
+        var indexSwordman = 0;
         while (true)
         {
-            var playerArcher = factory.Get(SpecializationType.archer);
-            var positionArcher = new Vector3(UnityEngine.Random.Range(min, max),
-                                       playerArcher.Transform.position.y,
-                                       UnityEngine.Random.Range(min, max));
-            playerArcher.Transform.position = positionArcher;
-            Players.Add(playerArcher);
+            var playerArcher = archers[indexArcher];          
+            SetPlayerPosition(playerArcher, min, max);
+            AddPlayer(playerArcher, _index, indexArcher);
+            ++indexArcher;
+            ++_index;
 
-            var playerSwordman = factory.Get(SpecializationType.swordsman);
-            var position = new Vector3(UnityEngine.Random.Range(min, max),
-                                       playerSwordman.Transform.position.y,
-                                       UnityEngine.Random.Range(min, max));
-            playerSwordman.Transform.position = position;
-            Players.Add(playerSwordman);
+            var playerSwordman = swordman[indexSwordman];           
+            SetPlayerPosition(playerSwordman, min, max);
+            AddPlayer(playerSwordman, _index, indexSwordman);
+            ++indexSwordman;
+            ++_index;
+
             UpdateQuantityPlayers?.Invoke(Players.Count);
 
-            CreatePathesForNearbyEnemy();
+            if(indexArcher >= SIZE_OF_ARMY || indexSwordman >= SIZE_OF_ARMY)
+            {
+                break;
+            }
 
             yield return new WaitForSeconds(3f);
+        }
+    }
+
+    private void InitArmy()
+    {
+        _zombieArchers = new List<Player>();
+        _zombieSwordmans = new List<Player>();
+        _peopleArchers = new List<Player>();
+        _peopleSwordmans = new List<Player>();
+    }
+
+    private void CreatedArmy(IFactory<Player> factory, SpecializationType specialization, List<Player> army, int quantity)
+    {
+        for (var i = 0; i < quantity; ++i)
+        {
+            var player = factory.Get(specialization);
+            player.enabled = false;
+            army.Add(player);
         }
     }
 }

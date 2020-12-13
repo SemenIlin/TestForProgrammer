@@ -12,6 +12,16 @@ public class Player : MonoBehaviour
     /// It is position in List people.
     /// </summary>
     public int? IndexMoveToEnemy { get; set; }
+    /// <summary>
+    /// Global index player on map.
+    /// </summary>
+    public int IndexInDictionary { get; set; }
+
+    /// <summary>
+    /// Index in List of army.
+    /// </summary>
+    public int IndexInList { get; set; }
+    public float TimeUntilNextUpdate { get; set; }
     public JumpPointParam JumpPointParam { get; set; }
     public List<Vector3> PathVector { get; set; } = new List<Vector3>();
     public Transform Transform { get; set; }

@@ -4,12 +4,23 @@ public class GameField : MonoBehaviour
 {
     [SerializeField] private Vector2Int _sizeBoard;
     [SerializeField] private GameObject _elementOfBoardPrefab;
-    [SerializeField] private Camera _camera;
 
     private Transform _sizeElementOfBoard;
 
     private GameObject[,] _elementOfBoards;
-    
+    public static GameField Instance { get; private set; }
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            return;
+        }
+    }
+
     public BaseGrid BaseGrid { get; set; }
     public Vector2Int SizeBoard => _sizeBoard;
     private void Start()

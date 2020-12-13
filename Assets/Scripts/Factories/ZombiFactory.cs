@@ -9,7 +9,7 @@ public class ZombiFactory : GameObjectFactory, IFactory<Player>
     {
         public Player Prefab;
 
-        [Range(1f, 100f)]
+        [Range(1f, 1000f)]
         public float Damage = 10f;
 
         [Range(1, 20)]
@@ -18,7 +18,7 @@ public class ZombiFactory : GameObjectFactory, IFactory<Player>
         [Range(0f, 100f)]
         public float Distance = 1f;
 
-        [Range(10f, 1000f)]
+        [Range(10f, 10000f)]
         public float Health = 100f;
 
         [Range(1, 20)]

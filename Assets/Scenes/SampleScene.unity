@@ -374,7 +374,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
   m_LocalRotation: {x: 0.42261827, y: 0, z: 0, w: 0.9063079}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: -23.78, y: 12.79, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -431,10 +431,10 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 20
+  far clip plane: 50
   field of view: 53
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 18
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   minSize: 2
-  maxSize: 10
+  maxSize: 18
   minCameraPosition: {x: 7.4, y: -1.3}
   maxCameraPosition: {x: 71.5, y: 68.8}
 --- !u!1 &1061596827
@@ -635,7 +635,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _sizeBoard: {x: 80, y: 80}
   _elementOfBoardPrefab: {fileID: 6910149293740831935, guid: 8e0110cb3af661b4a8bbc7d87aa119d4, type: 3}
-  _camera: {fileID: 963194227}
 --- !u!4 &1426921593
 Transform:
   m_ObjectHideFlags: 0
@@ -681,7 +680,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _peopleFactory: {fileID: 11400000, guid: 4922eb4676b355843bb385efd4049e83, type: 2}
   _zombiFactory: {fileID: 11400000, guid: f916a6e5f2a3c064f9fc578a21d23b81, type: 2}
-  _gameField: {fileID: 1426921592}
 --- !u!4 &6009898855913678803
 Transform:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float maxSize;
     [SerializeField] private Vector2 minCameraPosition;
     [SerializeField] private Vector2 maxCameraPosition;
+    private GameField _gameField;
 
     private Vector3 _startPosition;
     private Vector3 _direction;
@@ -17,8 +18,11 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
+        _gameField = GameField.Instance;
         _camera = GetComponent<Camera>();
         _transform = GetComponent<Transform>();
+
+        _camera.transform.position = new Vector3(_gameField.SizeBoard.x / 2, _transform.position.y, _gameField.SizeBoard.y / 2);
     }
     private void Update()
     {
