@@ -9,7 +9,7 @@ public class GameLogic : MonoBehaviour
 {
     public const float INTERVAL = 5f;
     private const float MAX_DISTANCE = 0.01f;
-    private const float PERIOD_FOR_UPDATE = 0.8f;
+    private const float PERIOD_FOR_UPDATE = 1f;
     private const int SIZE_OF_ARMY = 200;
     
     [SerializeField] private PeopleFactory _peopleFactory;
@@ -131,14 +131,33 @@ public class GameLogic : MonoBehaviour
     }
 
     /// <summary>
-    /// Reset pathes players going to  just now killed target
+    /// Create pathes for all player without target. Use after Death and Spawn player.
     /// </summary>
     /// <param name="player"></param>
-    public void ResetPathesForNearbyEnemy(Dictionary<int, Player> players)
+    public void CreatePathesForNearbyEnemy(Dictionary<int, Player> players)
     {
+        float distance;
+        float tempararyDistance;
         foreach (var player in players)
         {
             player.Value.IndexMoveToEnemy = null;
+            distance = float.MaxValue;
+            foreach (var playerJ in Players)
+            {
+                if (player.Value.RaceType == playerJ.Value.RaceType)
+                    continue;
+
+                tempararyDistance = (player.Value.Transform.position - playerJ.Value.Transform.position).magnitude;
+                if (distance > tempararyDistance)
+                {
+                    distance = tempararyDistance;
+                    player.Value.IndexMoveToEnemy = playerJ.Value.IndexInDictionary;
+                }
+            }
+            if (Path.ContainsKey(player.Value))
+                ChangePath(player.Value);
+            else
+                AddPath(player.Value);
         }
     }
     public void SearchPathForNearbyEnemy(Player player)
@@ -230,12 +249,10 @@ public class GameLogic : MonoBehaviour
         var endPosition = new GridPos((int)Math.Round(Players[player.IndexMoveToEnemy.Value].Transform.position.x),
                                       (int)Math.Round(Players[player.IndexMoveToEnemy.Value].Transform.position.z));
 
-        if (player.JumpPointParam == null)
-            player.JumpPointParam = new JumpPointParam(_gameField.BaseGrid, startPosition, endPosition);
-        else
-            player.JumpPointParam.Reset(startPosition, endPosition);
+       
+        var  jpParam = new JumpPointParam(_gameField.BaseGrid, startPosition, endPosition);
 
-        return JumpPointFinder.FindPath(player.JumpPointParam);
+        return JumpPointFinder.FindPath(jpParam);
     } 
 
     private void DestoyPlayer(Player takesDamage)
@@ -243,7 +260,7 @@ public class GameLogic : MonoBehaviour
         Path.Remove(takesDamage);
         Players.Remove(takesDamage.IndexInDictionary);
         DisatcivatePlayer(takesDamage);
-        ResetPathesForNearbyEnemy(GetPlayrsWithoutTarget(takesDamage));
+        CreatePathesForNearbyEnemy(GetPlayrsWithoutTarget(takesDamage));
 
         UpdateQuantityPlayers?.Invoke(Players.Count);
     }
@@ -288,7 +305,7 @@ public class GameLogic : MonoBehaviour
                 }
                 break;
         }
-        disactivate.Transform.position = new Vector3(-100, -100, -100);
+        disactivate.Transform.position = new Vector3(-100, disactivate.Transform.position.y, -100);
         disactivate.enabled = false;
     }
 
