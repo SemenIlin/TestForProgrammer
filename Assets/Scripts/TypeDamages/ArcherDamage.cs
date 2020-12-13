@@ -3,19 +3,20 @@ using UnityEngine;
 
 public class ArcherDamage : MonoBehaviour, ITakeDamage
 {
-    [SerializeField] private GameObject _bullet;
     private GameLogic _gameLogic;
     private Player _player;
+    private BulletPool _bulletPool;
     private void OnEnable()
     {
         _gameLogic = GameLogic.Instance;
+        _bulletPool = BulletPool.Instance;
         _player = GetComponent<Player>();
         _player.TakeDamage = this;
 
     }
     public IEnumerator Damage()
     {
-        var bullet = Instantiate(_bullet, _player.Transform, false);
+        var bullet = _bulletPool.CreateBullet(_player.RaceType, _player.Transform.position);
 
         var bulletTransform = bullet.GetComponent<Transform>();
         bulletTransform.position = _player.Transform.position;
@@ -37,7 +38,7 @@ public class ArcherDamage : MonoBehaviour, ITakeDamage
             yield return null;
         }
 
-        Destroy(bullet);
+        _bulletPool.DestroyBullet(bullet);
         if (playerTakeDamage.Health > 0)
         {
             _gameLogic.TakeDamage(_player, playerTakeDamage);

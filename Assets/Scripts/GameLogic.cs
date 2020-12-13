@@ -9,7 +9,7 @@ public class GameLogic : MonoBehaviour
 {
     public const float INTERVAL = 5f;
     private const float MAX_DISTANCE = 0.01f;
-    private const float PPERIOD_FOR_UPDATE = 0.8f;
+    private const float PERIOD_FOR_UPDATE = 0.8f;
     private const int SIZE_OF_ARMY = 200;
     
     [SerializeField] private PeopleFactory _peopleFactory;
@@ -59,8 +59,8 @@ public class GameLogic : MonoBehaviour
         var max = _gameField.SizeBoard.x <= _gameField.SizeBoard.y ? _gameField.SizeBoard.y :
                                                                      _gameField.SizeBoard.x;
 
-        StartCoroutine(SpawnPlayers(0, max - 1, _peopleArchers, _peopleSwordmans));
-        StartCoroutine(SpawnPlayers(0, max - 1, _zombieArchers, _zombieSwordmans));
+        StartCoroutine(SpawnPlayers(0, max - 2, _peopleArchers, _peopleSwordmans));
+        StartCoroutine(SpawnPlayers(0, max - 2, _zombieArchers, _zombieSwordmans));
     }
 
     private void Update()
@@ -100,7 +100,7 @@ public class GameLogic : MonoBehaviour
                     else
                     {
                         player.Value.TimeUntilNextUpdate += deltaTime;
-                        if (player.Value.TimeUntilNextUpdate > PPERIOD_FOR_UPDATE)
+                        if (player.Value.TimeUntilNextUpdate > PERIOD_FOR_UPDATE)
                         {
                             player.Value.TimeUntilNextUpdate = 0;
                             CreatePathForNearbyEnemy(player.Value);
@@ -131,36 +131,14 @@ public class GameLogic : MonoBehaviour
     }
 
     /// <summary>
-    /// Create pathes for all player without target. Use after Death and Spawn player.
+    /// Reset pathes players going to  just now killed target
     /// </summary>
     /// <param name="player"></param>
-    public void CreatePathesForNearbyEnemy(Dictionary<int, Player> players)
+    public void ResetPathesForNearbyEnemy(Dictionary<int, Player> players)
     {
-        float distance;
-        float tempararyDistance;
-
-        foreach(var player in players)
+        foreach (var player in players)
         {
             player.Value.IndexMoveToEnemy = null;
-            distance = float.MaxValue;
-
-            foreach (var playerJ in Players)
-            {
-                if (player.Value.RaceType == playerJ.Value.RaceType)
-                    continue;
-
-                tempararyDistance = (player.Value.Transform.position - playerJ.Value.Transform.position).magnitude;
-                if (distance > tempararyDistance)
-                {
-                    distance = tempararyDistance;
-                    player.Value.IndexMoveToEnemy = playerJ.Value.IndexInDictionary;
-                }
-            }
-
-            if (Path.ContainsKey(player.Value))
-                ChangePath(player.Value); 
-            else
-                AddPath(player.Value);
         }
     }
     public void SearchPathForNearbyEnemy(Player player)
@@ -263,10 +241,9 @@ public class GameLogic : MonoBehaviour
     private void DestoyPlayer(Player takesDamage)
     {
         Path.Remove(takesDamage);
-        var playersWitoutTarget = GetPlayrsWithoutTarget(takesDamage);
         Players.Remove(takesDamage.IndexInDictionary);
         DisatcivatePlayer(takesDamage);
-        CreatePathesForNearbyEnemy(playersWitoutTarget);
+        ResetPathesForNearbyEnemy(GetPlayrsWithoutTarget(takesDamage));
 
         UpdateQuantityPlayers?.Invoke(Players.Count);
     }
