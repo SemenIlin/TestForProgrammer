@@ -39,18 +39,19 @@ public class CameraController : MonoBehaviour
             var difference = currentDistanceTouch - distanceTouch;
             Zoom(difference * ZOOM_COEFFICIENT);
         }
-
-        if (Input.GetMouseButtonDown(0)) 
-        { 
-            _startPosition = _camera.ScreenToWorldPoint(Input.mousePosition);
-        }
-
-        if (Input.GetMouseButton(0))
+        else
         {
-            _direction = _startPosition - _camera.ScreenToWorldPoint(Input.mousePosition);
-            _transform.position = new Vector3(Mathf.Clamp(_transform.position.x +_direction.x , minCameraPosition.x, maxCameraPosition.x),
-                                         _transform.position.y,
-                                         Mathf.Clamp(_transform.position.z + _direction.z, minCameraPosition.y, maxCameraPosition.y));
+            if (Input.GetMouseButtonDown(0))
+            {
+                _startPosition = _camera.ScreenToWorldPoint(Input.mousePosition);
+            }
+            else if (Input.GetMouseButton(0))
+            {
+                _direction = _startPosition - _camera.ScreenToWorldPoint(Input.mousePosition);
+                _transform.position = new Vector3(Mathf.Clamp(_transform.position.x + _direction.x, minCameraPosition.x, maxCameraPosition.x),
+                                             _transform.position.y,
+                                             Mathf.Clamp(_transform.position.z + _direction.z, minCameraPosition.y, maxCameraPosition.y));
+            }
         }
     }
 

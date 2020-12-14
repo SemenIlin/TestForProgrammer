@@ -9,7 +9,7 @@ public class GameLogic : MonoBehaviour
 {
     public const float INTERVAL = 5f;
     private const float MAX_DISTANCE = 0.01f;
-    private const float PERIOD_FOR_UPDATE = 1f;
+    private const float PERIOD_FOR_UPDATE = 1.5f;
     private const int SIZE_OF_ARMY = 200;
     
     [SerializeField] private PeopleFactory _peopleFactory;
@@ -355,12 +355,14 @@ public class GameLogic : MonoBehaviour
         var indexSwordman = 0;
         while (true)
         {
+            indexArcher = indexArcher >= SIZE_OF_ARMY ? 0 : indexArcher;
             var playerArcher = archers[indexArcher];          
             SetPlayerPosition(playerArcher, min, max);
             AddPlayer(playerArcher, _index, indexArcher);
             ++indexArcher;
             ++_index;
 
+            indexSwordman = indexSwordman >= SIZE_OF_ARMY ? 0 : indexSwordman;
             var playerSwordman = swordman[indexSwordman];           
             SetPlayerPosition(playerSwordman, min, max);
             AddPlayer(playerSwordman, _index, indexSwordman);
@@ -369,7 +371,7 @@ public class GameLogic : MonoBehaviour
 
             UpdateQuantityPlayers?.Invoke(Players.Count);
 
-            if(indexArcher >= SIZE_OF_ARMY || indexSwordman >= SIZE_OF_ARMY)
+            if (Players.Count >= SIZE_OF_ARMY)
             {
                 break;
             }
