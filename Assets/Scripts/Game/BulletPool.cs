@@ -57,8 +57,9 @@ public class BulletPool : MonoBehaviour
     }
 
     public void DestroyBullet(GameObject bullet)
-    {
-        bullet.SetActive(false);
+    {        
+        var transform = bullet.transform;
+        transform.position = new Vector3(-100, transform.position.y, -100);
     }
 
     private void Init()
