@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Global index player on map.
     /// </summary>
-    public int IndexInDictionary { get; set; }
+    public int IndexInMap { get; set; }
 
     /// <summary>
     /// Index in List of army.
